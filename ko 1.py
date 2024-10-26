@@ -59,3 +59,38 @@ def kitap_ekle():
     
     except sql.Error as e:        #hata yönetimi
         print(f"Veri tabanı hatası!: {e}")
+
+def kitap_silme():
+
+    try:
+        with sql.connect('Liste2024.sqlite') as vt:     #veritabanına bağlanma
+            im = vt.cursor()
+
+            #kitap listesini görüntülüyoruz
+            komut = """SELECT * FROM 'Kitap Listesi'"""
+            im.execute(komut)
+            for kitap in im:
+                print(kitap)
+
+            #kullanıcıdan sileceği kitabın adı alınır
+            silinecek = input("silmek istediğiniz kitabı seçiniz: ")
+
+            #eğer kullanıcı boş değer girerse hata mesajı verir
+            if not silinecek.strip( ):
+                print("Hata: Geçerli bir kitap adı giriniz.")
+                return
+            
+            #veritabanından silme işlemi yapılır
+            komut = "DELETE FROM 'Kitap Listesi' WHERE kitap_adi = ?"
+            im.execute(komut, (silinecek,))
+            vt.commit()
+            
+            #eğer silme işleminin etkilediği satır sayısı 0 ise, işlem yapılmamıştır.
+            #yani o isimde kitap yoktur. hata mesajı döner
+            if im.rowcount == 0:
+                print("Hata: Silmek istediğiniz kitap bulunamadı.")
+            else:
+                print("Silme işlemi başarılı.")
+    
+    except sql.Error as e:     #hata yönetimi
+        print(f"Hata!: {e}")
